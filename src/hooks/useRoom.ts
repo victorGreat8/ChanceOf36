@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import {
-  doc, setDoc, getDoc, onSnapshot, updateDoc, arrayUnion,
+  doc, setDoc, getDoc, onSnapshot, updateDoc, arrayUnion, deleteDoc,
 } from 'firebase/firestore';
 import { db } from '../firebase';
 import type { GameState } from './useGame';
@@ -61,6 +61,7 @@ export function useRoom(uid: string) {
     if (!roomCode) return;
     const unsub = onSnapshot(doc(db, 'rooms', roomCode), (snap) => {
       if (snap.exists()) setRoom(snap.data() as Room);
+      else { setRoom(null); setRoomCode(null); }
     });
     return unsub;
   }, [roomCode]);
@@ -124,7 +125,7 @@ export function useRoom(uid: string) {
 
   const endGame = async () => {
     if (!roomCode) return;
-    await updateDoc(doc(db, 'rooms', roomCode), { status: 'finished' });
+    await deleteDoc(doc(db, 'rooms', roomCode));
   };
 
   const leaveRoom = () => {

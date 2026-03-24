@@ -1,5 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { Room } from '../hooks/useRoom';
+import { useLeaderboard } from '../hooks/useLeaderboard';
+import { useProfile } from '../hooks/useProfile';
 
 type Screen = 'home' | 'create' | 'join' | 'waiting';
 
@@ -33,6 +35,13 @@ export default function Lobby({
   const [screen, setScreen] = useState<Screen>('home');
   const [name, setName] = useState(defaultName);
   const [code, setCode] = useState('');
+  const leaderboard = useLeaderboard();
+  const { savedName, saveName } = useProfile(uid);
+
+  // Pre-fill name from saved profile once it loads
+  useEffect(() => {
+    if (savedName) setName(savedName);
+  }, [savedName]);
 
   // Auto-advance to waiting room once in a room
   const inRoom = !!room;
@@ -114,7 +123,7 @@ export default function Lobby({
   // ─── Home screen ───────────────────────────────────────────────────────────
   if (screen === 'home') {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 32, padding: 24 }}>
+      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 28, padding: 24 }}>
         <div style={{ textAlign: 'center' }}>
           <div style={{ fontSize: 64, marginBottom: 4 }}>🎲</div>
           <h1 style={{ fontSize: 42, fontWeight: 900, margin: 0, color: '#f0a500', letterSpacing: 1 }}>Chance of 36</h1>
@@ -131,6 +140,32 @@ export default function Lobby({
             📱 PLAY LOCAL (pass the device)
           </button>
         </div>
+
+        {leaderboard.length > 0 && (
+          <div style={{ width: '100%', maxWidth: 340 }}>
+            <div style={{ fontSize: 12, color: '#a0c8a0', fontWeight: 700, letterSpacing: 0.5, marginBottom: 8, textAlign: 'center' }}>
+              🏆 LEADERBOARD
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              {leaderboard.map((entry, i) => (
+                <div key={entry.uid} style={{
+                  display: 'flex', alignItems: 'center', gap: 10,
+                  padding: '8px 14px', borderRadius: 10,
+                  backgroundColor: i === 0 ? 'rgba(240,165,0,0.12)' : 'rgba(255,255,255,0.04)',
+                  border: i === 0 ? '1px solid rgba(240,165,0,0.25)' : '1px solid transparent',
+                }}>
+                  <span style={{ fontSize: 16, width: 24 }}>
+                    {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}.`}
+                  </span>
+                  <span style={{ flex: 1, fontWeight: 600, fontSize: 15 }}>{entry.name}</span>
+                  <span style={{ fontSize: 14, color: '#f0a500', fontWeight: 700 }}>
+                    {entry.wins} {entry.wins === 1 ? 'win' : 'wins'}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -151,7 +186,7 @@ export default function Lobby({
             style={inputStyle}
           />
           <button
-            onClick={() => onCreateRoom(name)}
+            onClick={() => { saveName(name); onCreateRoom(name); }}
             disabled={!name.trim() || loading}
             style={btnStyle(name.trim() && !loading ? '#f0a500' : 'rgba(255,255,255,0.08)', name.trim() && !loading ? '#1a1a1a' : '#555')}
           >
@@ -192,7 +227,7 @@ export default function Lobby({
           <div style={{ fontSize: 13, color: '#f87171', textAlign: 'center' }}>{error}</div>
         )}
         <button
-          onClick={() => onJoinRoom(code, name)}
+          onClick={() => { saveName(name); onJoinRoom(code, name); }}
           disabled={!name.trim() || code.length !== 4 || loading}
           style={btnStyle(name.trim() && code.length === 4 && !loading ? '#f0a500' : 'rgba(255,255,255,0.08)', name.trim() && code.length === 4 && !loading ? '#1a1a1a' : '#555')}
         >

@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { doc, updateDoc } from 'firebase/firestore';
+import { doc, updateDoc, setDoc, increment } from 'firebase/firestore';
 import { db } from '../firebase';
 import type { Die, Player } from '../types/game';
 import type { GameState } from './useGame';
@@ -113,6 +113,19 @@ export function useOnlineGame(room: Room | null, roomCode: string | null, uid: s
     await updateDoc(doc(db, 'rooms', roomCode), { gameState: newState });
   }, [roomCode]);
 
+  // Record a win for the winner in the leaderboard collection
+  const recordWin = useCallback(async (newState: GameState) => {
+    if (newState.phase !== 'game-over' || !room?.playerOrder) return;
+    const winner = newState.players.find(p => !p.eliminated);
+    if (!winner) return;
+    const winnerUid = room.playerOrder[winner.id];
+    if (!winnerUid) return;
+    await setDoc(doc(db, 'leaderboard', winnerUid), {
+      name: winner.name,
+      wins: increment(1),
+    }, { merge: true });
+  }, [room]);
+
   // ─── Main phase ─────────────────────────────────────────────────────────────
 
   const roll = useCallback(async () => {
@@ -201,18 +214,22 @@ export function useOnlineGame(room: Room | null, roomCode: string | null, uid: s
   const continueBonusRound = useCallback(async () => {
     if (!gameState || !isMyTurn || gameState.phase !== 'bonus-result') return;
     if (gameState.bonusRoundHits === 0 || gameState.bonusDice.every(d => d.kept)) {
-      await write(advanceToNextPlayer(gameState));
+      const newState = advanceToNextPlayer(gameState);
+      await write(newState);
+      await recordWin(newState);
       return;
     }
     const remaining = gameState.bonusDice.filter(d => !d.kept).length;
     await write({ ...gameState, phase: 'bonus-pre-roll',
       message: `Roll ${remaining} dice — aim for ${gameState.bonusTarget}s!` });
-  }, [gameState, isMyTurn, write]);
+  }, [gameState, isMyTurn, write, recordWin]);
 
   const nextTurn = useCallback(async () => {
     if (!gameState || !isMyTurn || gameState.phase !== 'result') return;
-    await write(advanceToNextPlayer(gameState));
-  }, [gameState, isMyTurn, write]);
+    const newState = advanceToNextPlayer(gameState);
+    await write(newState);
+    await recordWin(newState);
+  }, [gameState, isMyTurn, write, recordWin]);
 
   return { displayState, isMyTurn, roll, toggleDieSelect, keepSelected, rollBonus, continueBonusRound, nextTurn };
 }
