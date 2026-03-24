@@ -31,17 +31,13 @@ export default function App() {
   const { room, roomCode, error, loading: roomLoading, createRoom, joinRoom, startGame: startOnlineGame, endGame, leaveRoom } = useRoom(user?.uid ?? '');
   const { displayState, isMyTurn, roll: onlineRoll, toggleDieSelect: onlineToggle, keepSelected: onlineKeep, rollBonus: onlineRollBonus, continueBonusRound: onlineContinue, nextTurn: onlineNextTurn } = useOnlineGame(room, roomCode, user?.uid ?? '');
 
-  // Restore local mode if there's a saved game in localStorage
-  const [mode, setMode] = useState<'lobby' | 'local'>(() => {
-    try {
-      const saved = localStorage.getItem('chanceof36_game');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed.phase && parsed.phase !== 'setup') return 'local';
-      }
-    } catch { /* ignore */ }
-    return 'lobby';
-  });
+  const [mode, setMode] = useState<'lobby' | 'local'>(
+    () => (localStorage.getItem('chanceof36_mode') as 'lobby' | 'local') ?? 'lobby'
+  );
+
+  useEffect(() => {
+    localStorage.setItem('chanceof36_mode', mode);
+  }, [mode]);
 
   const currentPlayer = state.players[state.currentPlayerIndex];
   const isCpuTurn = currentPlayer?.isComputer && !currentPlayer.eliminated;
@@ -94,7 +90,7 @@ export default function App() {
 
   if (mode === 'local') {
     if (state.phase === 'setup') {
-      return <Setup onStart={startGame} onLogOut={logOut} userName={user.displayName ?? 'Player'} />;
+      return <Setup onStart={startGame} onBack={() => { newGame(); setMode('lobby'); }} onLogOut={logOut} userName={user.displayName ?? 'Player'} />;
     }
     return (
       <GameBoard

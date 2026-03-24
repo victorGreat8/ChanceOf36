@@ -141,31 +141,33 @@ export default function Lobby({
           </button>
         </div>
 
-        {leaderboard.length > 0 && (
-          <div style={{ width: '100%', maxWidth: 340 }}>
-            <div style={{ fontSize: 12, color: '#a0c8a0', fontWeight: 700, letterSpacing: 0.5, marginBottom: 8, textAlign: 'center' }}>
-              🏆 LEADERBOARD
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              {leaderboard.map((entry, i) => (
-                <div key={entry.uid} style={{
-                  display: 'flex', alignItems: 'center', gap: 10,
-                  padding: '8px 14px', borderRadius: 10,
-                  backgroundColor: i === 0 ? 'rgba(240,165,0,0.12)' : 'rgba(255,255,255,0.04)',
-                  border: i === 0 ? '1px solid rgba(240,165,0,0.25)' : '1px solid transparent',
-                }}>
-                  <span style={{ fontSize: 16, width: 24 }}>
-                    {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}.`}
-                  </span>
-                  <span style={{ flex: 1, fontWeight: 600, fontSize: 15 }}>{entry.name}</span>
-                  <span style={{ fontSize: 14, color: '#f0a500', fontWeight: 700 }}>
-                    {entry.wins} {entry.wins === 1 ? 'win' : 'wins'}
-                  </span>
-                </div>
-              ))}
-            </div>
+        <div style={{ width: '100%', maxWidth: 340 }}>
+          <div style={{ fontSize: 12, color: '#a0c8a0', fontWeight: 700, letterSpacing: 0.5, marginBottom: 8, textAlign: 'center' }}>
+            🏆 LEADERBOARD
           </div>
-        )}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            {leaderboard.length === 0 ? (
+              <div style={{ textAlign: 'center', fontSize: 13, color: '#555', padding: '10px 0' }}>
+                No wins recorded yet — finish a game to appear here!
+              </div>
+            ) : leaderboard.map((entry, i) => (
+              <div key={entry.uid} style={{
+                display: 'flex', alignItems: 'center', gap: 10,
+                padding: '8px 14px', borderRadius: 10,
+                backgroundColor: i === 0 ? 'rgba(240,165,0,0.12)' : 'rgba(255,255,255,0.04)',
+                border: i === 0 ? '1px solid rgba(240,165,0,0.25)' : '1px solid transparent',
+              }}>
+                <span style={{ fontSize: 16, width: 24 }}>
+                  {i === 0 ? '🥇' : i === 1 ? '🥈' : '🥉'}
+                </span>
+                <span style={{ flex: 1, fontWeight: 600, fontSize: 15 }}>{entry.name}</span>
+                <span style={{ fontSize: 14, color: '#f0a500', fontWeight: 700 }}>
+                  {entry.wins} {entry.wins === 1 ? 'win' : 'wins'}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     );
   }

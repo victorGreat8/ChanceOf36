@@ -7,11 +7,12 @@ interface PlayerDef {
 
 interface Props {
   onStart: (players: PlayerDef[]) => void;
+  onBack: () => void;
   onLogOut: () => void;
   userName: string;
 }
 
-export default function Setup({ onStart, onLogOut, userName }: Props) {
+export default function Setup({ onStart, onBack, onLogOut, userName }: Props) {
   const [playerCount, setPlayerCount] = useState(2);
   const [players, setPlayers] = useState<PlayerDef[]>(
     Array.from({ length: 6 }, (_, i) => ({ name: '', isComputer: i > 0 && i === 1 ? false : false }))
@@ -135,6 +136,13 @@ export default function Setup({ onStart, onLogOut, userName }: Props) {
           onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
         >
           START GAME
+        </button>
+        <button onClick={onBack} style={{
+          padding: '10px', borderRadius: 10, border: 'none',
+          backgroundColor: 'rgba(255,255,255,0.05)', color: '#888',
+          fontSize: 14, cursor: 'pointer',
+        }}>
+          ← Back
         </button>
       </div>
 
