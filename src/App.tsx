@@ -1,7 +1,9 @@
 import { useEffect } from 'react';
 import { useGame } from './hooks/useGame';
+import { useAuth } from './hooks/useAuth';
 import Setup from './components/Setup';
 import GameBoard from './components/GameBoard';
+import Login from './components/Login';
 import './index.css';
 
 // AI strategy: keep highest-value dice, always trying to push sum > 30.
@@ -13,16 +15,11 @@ function chooseKeptIds(dice: { id: number; value: number | null; kept: boolean }
   const keptSum = dice.filter(d => d.kept).reduce((a, d) => a + (d.value ?? 0), 0);
   const remainingAfterThis = dice.filter(d => !d.kept).length;
 
-  // How much more do we need to reach 30?
   const needed = Math.max(0, 31 - keptSum);
-  // Average per remaining die
   const neededPerDie = remainingAfterThis > 0 ? needed / remainingAfterThis : 0;
-
-  // Keep dice that are above the needed average (be greedy with good dice)
   const threshold = Math.max(3, Math.ceil(neededPerDie));
   let toKeep = unrolled.filter(d => (d.value ?? 0) >= threshold);
 
-  // Must keep at least 1
   if (toKeep.length === 0) {
     const best = unrolled.reduce((a, b) => (b.value ?? 0) > (a.value ?? 0) ? b : a);
     toKeep = [best];
@@ -32,6 +29,7 @@ function chooseKeptIds(dice: { id: number; value: number | null; kept: boolean }
 }
 
 export default function App() {
+  const { user, loading, signIn, logOut } = useAuth();
   const { state, startGame, roll, toggleDieSelect, keepSelected, keepSpecificDice, rollBonus, continueBonusRound, nextTurn, newGame } = useGame();
 
   const currentPlayer = state.players[state.currentPlayerIndex];
@@ -61,8 +59,23 @@ export default function App() {
     return () => clearTimeout(timer);
   }, [state.phase, state.currentPlayerIndex, isCpuTurn]);
 
+  // Still checking auth state
+  if (loading) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ fontSize: 48 }}>🎲</div>
+      </div>
+    );
+  }
+
+  // Not logged in
+  if (!user) {
+    return <Login onSignIn={signIn} />;
+  }
+
+  // Logged in — show game
   if (state.phase === 'setup') {
-    return <Setup onStart={startGame} />;
+    return <Setup onStart={startGame} onLogOut={logOut} userName={user.displayName ?? 'Player'} />;
   }
 
   return (
@@ -75,6 +88,8 @@ export default function App() {
       onContinueBonusRound={continueBonusRound}
       onNextTurn={nextTurn}
       onNewGame={newGame}
+      onLogOut={logOut}
+      userName={user.displayName ?? 'Player'}
     />
   );
 }

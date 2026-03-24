@@ -12,6 +12,8 @@ interface Props {
   onContinueBonusRound: () => void;
   onNextTurn: () => void;
   onNewGame: () => void;
+  onLogOut: () => void;
+  userName: string;
 }
 
 function DiceRow({ dice, interactive, onToggle, highlightValue }: {
@@ -44,6 +46,8 @@ export default function GameBoard({
   onContinueBonusRound,
   onNextTurn,
   onNewGame,
+  onLogOut,
+  userName,
 }: Props) {
   const { players, currentPlayerIndex, phase, dice, bonusDice, bonusTarget, message, currentSum, totalBonusMinus } = state;
   const currentPlayer = players[currentPlayerIndex];
@@ -99,6 +103,17 @@ export default function GameBoard({
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', padding: 16, gap: 14, maxWidth: 600, margin: '0 auto' }}>
+
+      {/* User bar */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 10 }}>
+        <span style={{ fontSize: 13, color: '#a0c8a0' }}>{userName}</span>
+        <button onClick={onLogOut} style={{
+          fontSize: 12, padding: '5px 12px', borderRadius: 8, border: 'none',
+          backgroundColor: 'rgba(255,255,255,0.08)', color: '#aaa', cursor: 'pointer',
+        }}>
+          Sign out
+        </button>
+      </div>
 
       <ScoreBoard players={players} currentPlayerIndex={currentPlayerIndex} />
 

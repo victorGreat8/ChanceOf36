@@ -7,9 +7,11 @@ interface PlayerDef {
 
 interface Props {
   onStart: (players: PlayerDef[]) => void;
+  onLogOut: () => void;
+  userName: string;
 }
 
-export default function Setup({ onStart }: Props) {
+export default function Setup({ onStart, onLogOut, userName }: Props) {
   const [playerCount, setPlayerCount] = useState(2);
   const [players, setPlayers] = useState<PlayerDef[]>(
     Array.from({ length: 6 }, (_, i) => ({ name: '', isComputer: i > 0 && i === 1 ? false : false }))
@@ -37,6 +39,17 @@ export default function Setup({ onStart }: Props) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', padding: 24, gap: 32 }}>
+
+      {/* User bar */}
+      <div style={{ position: 'fixed', top: 12, right: 16, display: 'flex', alignItems: 'center', gap: 10 }}>
+        <span style={{ fontSize: 13, color: '#a0c8a0' }}>{userName}</span>
+        <button onClick={onLogOut} style={{
+          fontSize: 12, padding: '5px 12px', borderRadius: 8, border: 'none',
+          backgroundColor: 'rgba(255,255,255,0.08)', color: '#aaa', cursor: 'pointer',
+        }}>
+          Sign out
+        </button>
+      </div>
 
       {/* Title */}
       <div style={{ textAlign: 'center' }}>

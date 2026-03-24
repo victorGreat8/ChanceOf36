@@ -1,6 +1,6 @@
 # Chance of 36
 
-A local multiplayer dice game for 2–6 players built with React + TypeScript + Vite.
+A multiplayer dice game for 2–6 players built with React + TypeScript + Vite + Firebase.
 
 ## How to play
 
@@ -19,6 +19,7 @@ A local multiplayer dice game for 2–6 players built with React + TypeScript + 
 
 ## Features
 
+- Google Sign-In via Firebase Auth
 - 2–6 players, pass the device
 - Computer players (🤖) with auto-play
 - Game state saved to localStorage — refresh won't lose your progress
@@ -35,4 +36,4 @@ npm run dev
 
 - Vite 5 + React 18 + TypeScript
 - Tailwind CSS v3
-- No backend — runs entirely in the browser
+- Firebase (Auth + Firestore)
