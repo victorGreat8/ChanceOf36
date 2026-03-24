@@ -1,5 +1,7 @@
 # Chance of 36
 
+> **Note:** This project was built with [Claude Code](https://claude.ai/claude-code) (Anthropic's AI coding tool). The game concept, rules, and design decisions were made by the developer — the implementation was written by Claude.
+
 A multiplayer dice game for 2–6 players built with React + TypeScript + Vite + Firebase.
 
 ## How to play
