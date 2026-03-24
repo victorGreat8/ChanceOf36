@@ -21,9 +21,10 @@ A multiplayer dice game for 2–6 players built with React + TypeScript + Vite +
 
 ## Features
 
+- **Online multiplayer** — create a room, share a 4-letter code, play on separate devices in real-time
+- **Local multiplayer** — pass the device, 2–6 players
 - Google Sign-In via Firebase Auth
-- 2–6 players, pass the device
-- Computer players (🤖) with auto-play
+- Computer players (🤖) with auto-play (local mode)
 - Game state saved to localStorage — refresh won't lose your progress
 - Dark mobile-friendly UI
 

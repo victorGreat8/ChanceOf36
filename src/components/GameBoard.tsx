@@ -14,6 +14,8 @@ interface Props {
   onNewGame: () => void;
   onLogOut: () => void;
   userName: string;
+  isMyTurn?: boolean;       // undefined = local game (always true)
+  roomCode?: string;        // shown in online games
 }
 
 function DiceRow({ dice, interactive, onToggle, highlightValue }: {
@@ -48,6 +50,8 @@ export default function GameBoard({
   onNewGame,
   onLogOut,
   userName,
+  isMyTurn = true,
+  roomCode,
 }: Props) {
   const { players, currentPlayerIndex, phase, dice, bonusDice, bonusTarget, message, currentSum, totalBonusMinus } = state;
   const currentPlayer = players[currentPlayerIndex];
@@ -105,14 +109,20 @@ export default function GameBoard({
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', padding: 16, gap: 14, maxWidth: 600, margin: '0 auto' }}>
 
       {/* User bar */}
-      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 10 }}>
-        <span style={{ fontSize: 13, color: '#a0c8a0' }}>{userName}</span>
-        <button onClick={onLogOut} style={{
-          fontSize: 12, padding: '5px 12px', borderRadius: 8, border: 'none',
-          backgroundColor: 'rgba(255,255,255,0.08)', color: '#aaa', cursor: 'pointer',
-        }}>
-          Sign out
-        </button>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        {roomCode
+          ? <span style={{ fontSize: 12, color: '#666', fontFamily: 'monospace', letterSpacing: 2 }}>ROOM: {roomCode}</span>
+          : <span />
+        }
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <span style={{ fontSize: 13, color: '#a0c8a0' }}>{userName}</span>
+          <button onClick={onLogOut} style={{
+            fontSize: 12, padding: '5px 12px', borderRadius: 8, border: 'none',
+            backgroundColor: 'rgba(255,255,255,0.08)', color: '#aaa', cursor: 'pointer',
+          }}>
+            Sign out
+          </button>
+        </div>
       </div>
 
       <ScoreBoard players={players} currentPlayerIndex={currentPlayerIndex} />
@@ -235,31 +245,42 @@ export default function GameBoard({
 
       {/* ─── ACTION BUTTONS ─── */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        {phase === 'pre-roll' && (
-          <Btn onClick={onRoll}>🎲 ROLL DICE</Btn>
-        )}
-        {phase === 'selecting' && (
-          <Btn onClick={onKeepSelected} disabled={!canKeep}>
-            {canKeep ? `KEEP ${selectedCount} SELECTED` : 'SELECT AT LEAST 1 DIE'}
-          </Btn>
-        )}
-        {phase === 'bonus-pre-roll' && (
-          <Btn onClick={onRollBonus} gold>
-            🎲 ROLL {bonusDice.filter(d => !d.kept).length || 6} DICE
-          </Btn>
-        )}
-        {phase === 'bonus-result' && (() => {
-          const remaining = bonusDice.filter(d => !d.kept).length;
-          const hasHits = state.bonusRoundHits > 0;
-          const canContinue = hasHits && remaining > 0;
-          return (
-            <Btn onClick={onContinueBonusRound} gold={canContinue}>
-              {canContinue ? `🎲 ROLL ${remaining} REMAINING` : 'NEXT PLAYER →'}
-            </Btn>
-          );
-        })()}
-        {phase === 'result' && (
-          <Btn onClick={onNextTurn}>NEXT PLAYER →</Btn>
+        {!isMyTurn ? (
+          <div style={{
+            textAlign: 'center', padding: 16, borderRadius: 12,
+            backgroundColor: 'rgba(255,255,255,0.04)', color: '#666', fontSize: 15,
+          }}>
+            Waiting for {currentPlayer?.name}…
+          </div>
+        ) : (
+          <>
+            {phase === 'pre-roll' && (
+              <Btn onClick={onRoll}>🎲 ROLL DICE</Btn>
+            )}
+            {phase === 'selecting' && (
+              <Btn onClick={onKeepSelected} disabled={!canKeep}>
+                {canKeep ? `KEEP ${selectedCount} SELECTED` : 'SELECT AT LEAST 1 DIE'}
+              </Btn>
+            )}
+            {phase === 'bonus-pre-roll' && (
+              <Btn onClick={onRollBonus} gold>
+                🎲 ROLL {bonusDice.filter(d => !d.kept).length || 6} DICE
+              </Btn>
+            )}
+            {phase === 'bonus-result' && (() => {
+              const remaining = bonusDice.filter(d => !d.kept).length;
+              const hasHits = state.bonusRoundHits > 0;
+              const canContinue = hasHits && remaining > 0;
+              return (
+                <Btn onClick={onContinueBonusRound} gold={canContinue}>
+                  {canContinue ? `🎲 ROLL ${remaining} REMAINING` : 'NEXT PLAYER →'}
+                </Btn>
+              );
+            })()}
+            {phase === 'result' && (
+              <Btn onClick={onNextTurn}>NEXT PLAYER →</Btn>
+            )}
+          </>
         )}
       </div>
     </div>

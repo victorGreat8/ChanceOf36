@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useGame } from './hooks/useGame';
 import { useAuth } from './hooks/useAuth';
 import { useRoom } from './hooks/useRoom';
+import { useOnlineGame } from './hooks/useOnlineGame';
 import Setup from './components/Setup';
 import GameBoard from './components/GameBoard';
 import Login from './components/Login';
@@ -27,15 +28,15 @@ function chooseKeptIds(dice: { id: number; value: number | null; kept: boolean }
 export default function App() {
   const { user, loading, signIn, logOut } = useAuth();
   const { state, startGame, roll, toggleDieSelect, keepSelected, keepSpecificDice, rollBonus, continueBonusRound, nextTurn, newGame } = useGame();
-  const { room, roomCode, error, loading: roomLoading, createRoom, joinRoom, startGame: startOnlineGame, leaveRoom } = useRoom(user?.uid ?? '');
+  const { room, roomCode, error, loading: roomLoading, createRoom, joinRoom, startGame: startOnlineGame, endGame, leaveRoom } = useRoom(user?.uid ?? '');
+  const { displayState, isMyTurn, roll: onlineRoll, toggleDieSelect: onlineToggle, keepSelected: onlineKeep, rollBonus: onlineRollBonus, continueBonusRound: onlineContinue, nextTurn: onlineNextTurn } = useOnlineGame(room, roomCode, user?.uid ?? '');
 
-  // 'lobby' = show lobby/home, 'local' = show local game setup
   const [mode, setMode] = useState<'lobby' | 'local'>('lobby');
 
   const currentPlayer = state.players[state.currentPlayerIndex];
   const isCpuTurn = currentPlayer?.isComputer && !currentPlayer.eliminated;
 
-  // AI auto-play
+  // AI auto-play (local mode only)
   useEffect(() => {
     if (!isCpuTurn) return;
     let timer: ReturnType<typeof setTimeout>;
@@ -47,7 +48,6 @@ export default function App() {
     return () => clearTimeout(timer);
   }, [state.phase, state.currentPlayerIndex, isCpuTurn]);
 
-  // Loading auth
   if (loading) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -56,19 +56,35 @@ export default function App() {
     );
   }
 
-  // Not logged in
   if (!user) return <Login onSignIn={signIn} />;
 
-  // Local game flow
+  // ─── Online game in progress ───────────────────────────────────────────────
+
+  if (room?.status === 'playing' && displayState) {
+    const myName = room.players.find(p => p.uid === user.uid)?.name ?? user.displayName ?? 'Player';
+    return (
+      <GameBoard
+        state={displayState}
+        onRoll={onlineRoll}
+        onToggleSelect={onlineToggle}
+        onKeepSelected={onlineKeep}
+        onRollBonus={onlineRollBonus}
+        onContinueBonusRound={onlineContinue}
+        onNextTurn={onlineNextTurn}
+        onNewGame={() => { endGame(); leaveRoom(); }}
+        onLogOut={logOut}
+        userName={myName}
+        isMyTurn={isMyTurn}
+        roomCode={roomCode ?? undefined}
+      />
+    );
+  }
+
+  // ─── Local game ───────────────────────────────────────────────────────────
+
   if (mode === 'local') {
     if (state.phase === 'setup') {
-      return (
-        <Setup
-          onStart={startGame}
-          onLogOut={logOut}
-          userName={user.displayName ?? 'Player'}
-        />
-      );
+      return <Setup onStart={startGame} onLogOut={logOut} userName={user.displayName ?? 'Player'} />;
     }
     return (
       <GameBoard
@@ -82,11 +98,13 @@ export default function App() {
         onNewGame={() => { newGame(); setMode('lobby'); }}
         onLogOut={logOut}
         userName={user.displayName ?? 'Player'}
+        isMyTurn={true}
       />
     );
   }
 
-  // Online lobby
+  // ─── Lobby ────────────────────────────────────────────────────────────────
+
   return (
     <Lobby
       uid={user.uid}
