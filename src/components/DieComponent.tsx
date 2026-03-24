@@ -4,7 +4,7 @@ interface Props {
   die: Die;
   onClick?: () => void;
   interactive?: boolean;
-  highlight?: boolean;  // For bonus dice showing 3
+  highlight?: boolean;  // For bonus dice matching the target
   size?: 'normal' | 'large' | 'small';
 }
 
@@ -87,7 +87,7 @@ export default function DieComponent({ die, onClick, interactive = false, highli
     border = '3px solid #f0a500';
   }
 
-  if (highlight && die.value === 3) {
+  if (highlight) {
     bg = '#d4edda';
     border = '3px solid #28a745';
   }
@@ -98,7 +98,7 @@ export default function DieComponent({ die, onClick, interactive = false, highli
 
   const classes = [
     die.rolling ? 'die-rolling' : '',
-    highlight && die.value === 3 ? 'die-bonus-hit' : '',
+    highlight ? 'die-bonus-hit' : '',
   ].filter(Boolean).join(' ');
 
   return (

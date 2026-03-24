@@ -4,6 +4,8 @@
 
 A multiplayer dice game for 2–6 players built with React + TypeScript + Vite + Firebase.
 
+**Live:** https://chanceof36.web.app
+
 ## How to play
 
 - All players start at **30 points**

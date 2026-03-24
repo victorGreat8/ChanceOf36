@@ -79,6 +79,9 @@ function processMainResult(state: GameState, finalDice: Die[], sum: number): Gam
 export function useOnlineGame(room: Room | null, roomCode: string | null, uid: string) {
   // Local-only: which bonus dice the current player has selected
   const [localSelected, setLocalSelected] = useState<Set<number>>(new Set());
+  // Local-only: which dice are currently animating (rolling)
+  const [rollingIds, setRollingIds] = useState<Set<number>>(new Set());
+  const [bonusRollingIds, setBonusRollingIds] = useState<Set<number>>(new Set());
 
   const gameState = room?.gameState ?? null;
 
@@ -90,12 +93,17 @@ export function useOnlineGame(room: Room | null, roomCode: string | null, uid: s
     gameState.phase !== 'game-over'
   );
 
-  // Merge local selection into the display state so the UI shows selected dice
+  // Merge local selection + rolling animation into display state
   const displayState: GameState | null = gameState ? {
     ...gameState,
     dice: gameState.dice.map(d => ({
       ...d,
       selected: !d.kept && localSelected.has(d.id),
+      rolling: rollingIds.has(d.id),
+    })),
+    bonusDice: gameState.bonusDice.map(d => ({
+      ...d,
+      rolling: bonusRollingIds.has(d.id),
     })),
   } : null;
 
@@ -112,6 +120,10 @@ export function useOnlineGame(room: Room | null, roomCode: string | null, uid: s
     const newDice = gameState.dice.map(d =>
       d.kept ? d : { ...d, value: rollDie(), rolling: false }
     );
+    // Animate locally for 450ms
+    const ids = new Set(newDice.filter(d => !d.kept).map(d => d.id));
+    setRollingIds(ids);
+    setTimeout(() => setRollingIds(new Set()), 450);
     await write({ ...gameState, phase: 'selecting', dice: newDice, message: 'Select dice to keep, then press Keep' });
   }, [gameState, isMyTurn, write]);
 
@@ -152,6 +164,10 @@ export function useOnlineGame(room: Room | null, roomCode: string | null, uid: s
     const rolled = gameState.bonusDice.map(d =>
       d.kept ? d : { ...d, value: rollDie(), rolling: false }
     );
+    // Animate locally for 450ms
+    const bonusIds = new Set(rolled.filter(d => !gameState.bonusDice.find(pd => pd.id === d.id)?.kept).map(d => d.id));
+    setBonusRollingIds(bonusIds);
+    setTimeout(() => setBonusRollingIds(new Set()), 450);
     const hits = rolled.filter(d => !gameState.bonusDice.find(pd => pd.id === d.id)?.kept && d.value === bonusTarget).length;
     const minus = hits * bonusTarget;
     const newTotal = gameState.totalBonusMinus + minus;

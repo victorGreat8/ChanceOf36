@@ -133,9 +133,9 @@ export function useGame() {
       const newDice = prev.dice.map(d =>
         d.kept ? d : { ...d, value: rollDie(), rolling: true, selected: false }
       );
-      clearRolling('dice');
       return { ...prev, phase: 'selecting', dice: newDice, message: 'Tap dice to select, then press "Keep"' };
     });
+    clearRolling('dice');
   }, []);
 
   const toggleDieSelect = useCallback((id: number) => {
@@ -233,7 +233,6 @@ export function useGame() {
       const rolled = prev.bonusDice.map(d =>
         d.kept ? d : { ...d, value: rollDie(), rolling: true }
       );
-      clearRolling('bonusDice');
 
       // Count new hits (only from dice we just rolled)
       const hits = rolled.filter(d => !prev.bonusDice.find(pd => pd.id === d.id)?.kept && d.value === bonusTarget).length;
@@ -248,7 +247,6 @@ export function useGame() {
       const remaining = afterKeep.filter(d => !d.kept).length;
 
       if (hits === 0) {
-        // No targets — bonus ends, show result first then move to next player
         const summary = newTotal > 0
           ? `No ${bonusTarget}s — bonus over. ${name} dealt ${newTotal} pts total.`
           : `No ${bonusTarget}s — bonus round ends.`;
@@ -278,6 +276,7 @@ export function useGame() {
         message: continueMsg,
       };
     });
+    clearRolling('bonusDice');
   }, []);
 
   const continueBonusRound = useCallback(() => {
