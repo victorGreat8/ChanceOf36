@@ -12,7 +12,7 @@ export function useLeaderboard() {
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
 
   useEffect(() => {
-    const q = query(collection(db, 'leaderboard'), orderBy('wins', 'desc'), limit(3));
+    const q = query(collection(db, 'leaderboard'), orderBy('wins', 'desc'), limit(5));
     const unsub = onSnapshot(q, snap => {
       setEntries(snap.docs.map(d => ({ uid: d.id, ...(d.data() as { name: string; wins: number }) })));
     });

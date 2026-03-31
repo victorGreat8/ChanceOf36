@@ -158,7 +158,7 @@ export default function Lobby({
                 border: i === 0 ? '1px solid rgba(240,165,0,0.25)' : '1px solid transparent',
               }}>
                 <span style={{ fontSize: 16, width: 24 }}>
-                  {i === 0 ? '🥇' : i === 1 ? '🥈' : '🥉'}
+                  {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}.`}
                 </span>
                 <span style={{ flex: 1, fontWeight: 600, fontSize: 15 }}>{entry.name}</span>
                 <span style={{ fontSize: 14, color: '#f0a500', fontWeight: 700 }}>
