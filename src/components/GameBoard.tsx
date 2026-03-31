@@ -64,6 +64,12 @@ export default function GameBoard({
   const selectedCount = dice.filter(d => !d.kept && d.selected).length;
   const canKeep = selectedCount > 0;
 
+  // Best possible score if you keep selected + roll remaining dice and get all 6s
+  const keptSum = keptDice.reduce((a, d) => a + (d.value ?? 0), 0);
+  const selectedSum = dice.filter(d => !d.kept && d.selected).reduce((a, d) => a + (d.value ?? 0), 0);
+  const remainingCount = dice.filter(d => !d.kept && !d.selected).length;
+  const bestCase = keptSum + selectedSum + remainingCount * 6;
+
   // ─── Game Over ────────────────────────────────────────────────────────────
 
   if (phase === 'game-over') {
@@ -171,8 +177,15 @@ export default function GameBoard({
           {activeDice.length > 0 && (
             <div>
               {phase === 'selecting' && (
-                <div style={{ fontSize: 11, color: '#f0a500', fontWeight: 700, marginBottom: 8, textAlign: 'center' }}>
-                  TAP TO SELECT
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                  <div style={{ fontSize: 11, color: '#f0a500', fontWeight: 700 }}>
+                    TAP TO SELECT
+                  </div>
+                  {selectedCount > 0 && (
+                    <div style={{ fontSize: 12, color: '#a0c8a0', fontWeight: 700 }}>
+                      Best possible: <span style={{ color: bestCase >= 30 ? '#86efac' : '#f87171', fontSize: 14 }}>{bestCase}</span>
+                    </div>
+                  )}
                 </div>
               )}
               <DiceRow dice={activeDice} interactive={phase === 'selecting'} onToggle={onToggleSelect} />
