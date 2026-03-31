@@ -183,7 +183,7 @@ export default function GameBoard({
                   </div>
                   {selectedCount > 0 && (
                     <div style={{ fontSize: 12, color: '#a0c8a0', fontWeight: 700 }}>
-                      Best possible: <span style={{ color: bestCase >= 30 ? '#86efac' : '#f87171', fontSize: 14 }}>{bestCase}</span>
+                      Chance of: <span style={{ color: bestCase >= 30 ? '#86efac' : '#f87171', fontSize: 14 }}>{bestCase}</span>
                     </div>
                   )}
                 </div>
