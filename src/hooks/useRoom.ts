@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import {
-  doc, setDoc, getDoc, onSnapshot, updateDoc, arrayUnion, deleteDoc,
+  doc, setDoc, getDoc, onSnapshot, updateDoc, arrayUnion, deleteDoc, Timestamp,
 } from 'firebase/firestore';
 import { db } from '../firebase';
 import type { GameState } from './useGame';
@@ -81,6 +81,7 @@ export function useRoom(uid: string) {
       hostUid: uid,
       status: 'lobby',
       players: [{ uid, name: playerName.trim(), joinedAt: Date.now() }],
+      expiresAt: Timestamp.fromDate(new Date(Date.now() + 24 * 60 * 60 * 1000)),
     });
     setRoomCode(code);
     setLoading(false);

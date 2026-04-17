@@ -117,7 +117,13 @@ export default function GameBoard({
       {/* User bar */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         {roomCode
-          ? <span style={{ fontSize: 12, color: '#666', fontFamily: 'monospace', letterSpacing: 2 }}>ROOM: {roomCode}</span>
+          ? <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: 12, color: '#666', fontFamily: 'monospace', letterSpacing: 2 }}>ROOM: {roomCode}</span>
+              <button
+                onClick={() => { if (window.confirm('End the game for everyone?')) onNewGame(); }}
+                style={{ fontSize: 11, padding: '4px 10px', borderRadius: 8, border: 'none', backgroundColor: 'rgba(248,113,113,0.15)', color: '#f87171', cursor: 'pointer' }}
+              >End</button>
+            </div>
           : <button onClick={onNewGame} style={{
               fontSize: 12, padding: '5px 12px', borderRadius: 8, border: 'none',
               backgroundColor: 'rgba(255,255,255,0.08)', color: '#aaa', cursor: 'pointer',
