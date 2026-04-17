@@ -118,7 +118,10 @@ export default function GameBoard({
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         {roomCode
           ? <span style={{ fontSize: 12, color: '#666', fontFamily: 'monospace', letterSpacing: 2 }}>ROOM: {roomCode}</span>
-          : <span />
+          : <button onClick={onNewGame} style={{
+              fontSize: 12, padding: '5px 12px', borderRadius: 8, border: 'none',
+              backgroundColor: 'rgba(255,255,255,0.08)', color: '#aaa', cursor: 'pointer',
+            }}>← Menu</button>
         }
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <span style={{ fontSize: 13, color: '#a0c8a0' }}>{userName}</span>
