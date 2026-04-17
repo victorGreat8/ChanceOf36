@@ -174,23 +174,31 @@ export default function Lobby({
 
   // ─── Create room ───────────────────────────────────────────────────────────
   if (screen === 'create') {
+    const nameReady = savedName ? true : !!name.trim();
     return (
       <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 24, padding: 24 }}>
         <h2 style={{ fontSize: 26, fontWeight: 900, color: '#f0a500', margin: 0 }}>Create a game</h2>
         <div style={{ width: '100%', maxWidth: 340, display: 'flex', flexDirection: 'column', gap: 12 }}>
           <label style={{ fontSize: 13, color: '#a0c8a0', fontWeight: 600 }}>YOUR NAME</label>
-          <input
-            type="text"
-            value={name}
-            onChange={e => setName(e.target.value)}
-            placeholder="Enter your name"
-            maxLength={14}
-            style={inputStyle}
-          />
+          {savedName ? (
+            <div style={{ ...inputStyle, color: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span>{savedName}</span>
+              <span style={{ fontSize: 11, color: '#555' }}>locked</span>
+            </div>
+          ) : (
+            <input
+              type="text"
+              value={name}
+              onChange={e => setName(e.target.value)}
+              placeholder="Enter your name"
+              maxLength={14}
+              style={inputStyle}
+            />
+          )}
           <button
-            onClick={() => { saveName(name); onCreateRoom(name); }}
-            disabled={!name.trim() || loading}
-            style={btnStyle(name.trim() && !loading ? '#f0a500' : 'rgba(255,255,255,0.08)', name.trim() && !loading ? '#1a1a1a' : '#555')}
+            onClick={() => { saveName(name); onCreateRoom(savedName || name); }}
+            disabled={!nameReady || loading}
+            style={btnStyle(nameReady && !loading ? '#f0a500' : 'rgba(255,255,255,0.08)', nameReady && !loading ? '#1a1a1a' : '#555')}
           >
             {loading ? 'Creating…' : 'CREATE GAME →'}
           </button>
@@ -208,14 +216,21 @@ export default function Lobby({
       <h2 style={{ fontSize: 26, fontWeight: 900, color: '#f0a500', margin: 0 }}>Join a game</h2>
       <div style={{ width: '100%', maxWidth: 340, display: 'flex', flexDirection: 'column', gap: 12 }}>
         <label style={{ fontSize: 13, color: '#a0c8a0', fontWeight: 600 }}>YOUR NAME</label>
-        <input
-          type="text"
-          value={name}
-          onChange={e => setName(e.target.value)}
-          placeholder="Enter your name"
-          maxLength={14}
-          style={inputStyle}
-        />
+        {savedName ? (
+          <div style={{ ...inputStyle, color: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span>{savedName}</span>
+            <span style={{ fontSize: 11, color: '#555' }}>locked</span>
+          </div>
+        ) : (
+          <input
+            type="text"
+            value={name}
+            onChange={e => setName(e.target.value)}
+            placeholder="Enter your name"
+            maxLength={14}
+            style={inputStyle}
+          />
+        )}
         <label style={{ fontSize: 13, color: '#a0c8a0', fontWeight: 600, marginTop: 4 }}>ROOM CODE</label>
         <input
           type="text"
@@ -229,9 +244,9 @@ export default function Lobby({
           <div style={{ fontSize: 13, color: '#f87171', textAlign: 'center' }}>{error}</div>
         )}
         <button
-          onClick={() => { saveName(name); onJoinRoom(code, name); }}
-          disabled={!name.trim() || code.length !== 4 || loading}
-          style={btnStyle(name.trim() && code.length === 4 && !loading ? '#f0a500' : 'rgba(255,255,255,0.08)', name.trim() && code.length === 4 && !loading ? '#1a1a1a' : '#555')}
+          onClick={() => { saveName(name); onJoinRoom(code, savedName || name); }}
+          disabled={(!savedName && !name.trim()) || code.length !== 4 || loading}
+          style={btnStyle((savedName || name.trim()) && code.length === 4 && !loading ? '#f0a500' : 'rgba(255,255,255,0.08)', (savedName || name.trim()) && code.length === 4 && !loading ? '#1a1a1a' : '#555')}
         >
           {loading ? 'Joining…' : 'JOIN GAME →'}
         </button>
