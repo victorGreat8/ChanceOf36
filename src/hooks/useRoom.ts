@@ -53,9 +53,16 @@ function buildInitialGameState(roomPlayers: RoomPlayer[]): GameState {
 
 export function useRoom(uid: string) {
   const [room, setRoom] = useState<Room | null>(null);
-  const [roomCode, setRoomCode] = useState<string | null>(null);
+  const [roomCode, setRoomCode] = useState<string | null>(
+    () => localStorage.getItem('chanceof36_roomCode')
+  );
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (roomCode) localStorage.setItem('chanceof36_roomCode', roomCode);
+    else localStorage.removeItem('chanceof36_roomCode');
+  }, [roomCode]);
 
   useEffect(() => {
     if (!roomCode) return;
