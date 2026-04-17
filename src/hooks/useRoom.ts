@@ -128,7 +128,15 @@ export function useRoom(uid: string) {
     await deleteDoc(doc(db, 'rooms', roomCode));
   };
 
-  const leaveRoom = () => {
+  const leaveRoom = async () => {
+    if (roomCode && room && room.status === 'lobby') {
+      if (room.hostUid === uid) {
+        await deleteDoc(doc(db, 'rooms', roomCode));
+      } else {
+        const updatedPlayers = room.players.filter(p => p.uid !== uid);
+        await updateDoc(doc(db, 'rooms', roomCode), { players: updatedPlayers });
+      }
+    }
     setRoom(null);
     setRoomCode(null);
     setError(null);

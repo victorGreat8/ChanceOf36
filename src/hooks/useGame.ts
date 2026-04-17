@@ -283,9 +283,17 @@ export function useGame() {
     setState(prev => {
       if (prev.phase !== 'bonus-result') return prev;
 
-      // If no hits last throw, or no remaining dice → advance to next player
-      if (prev.bonusRoundHits === 0 || prev.bonusDice.every(d => d.kept)) {
-        return advanceToNextPlayer(prev);
+      // No hits → bonus ends
+      if (prev.bonusRoundHits === 0) return advanceToNextPlayer(prev);
+
+      // All 6 dice hit the target → reset to 6 fresh dice and keep going
+      if (prev.bonusDice.every(d => d.kept)) {
+        return {
+          ...prev,
+          phase: 'bonus-pre-roll',
+          bonusDice: makeDice(6),
+          message: `All ${prev.bonusTarget}s! Roll 6 fresh dice!`,
+        };
       }
 
       // Still have non-kept dice to roll

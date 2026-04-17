@@ -213,10 +213,17 @@ export function useOnlineGame(room: Room | null, roomCode: string | null, uid: s
 
   const continueBonusRound = useCallback(async () => {
     if (!gameState || !isMyTurn || gameState.phase !== 'bonus-result') return;
-    if (gameState.bonusRoundHits === 0 || gameState.bonusDice.every(d => d.kept)) {
+    if (gameState.bonusRoundHits === 0) {
       const newState = advanceToNextPlayer(gameState);
       await write(newState);
       await recordWin(newState);
+      return;
+    }
+    // All 6 dice hit the target → reset to 6 fresh dice and keep going
+    if (gameState.bonusDice.every(d => d.kept)) {
+      await write({ ...gameState, phase: 'bonus-pre-roll',
+        bonusDice: makeDice(6),
+        message: `All ${gameState.bonusTarget}s! Roll 6 fresh dice!` });
       return;
     }
     const remaining = gameState.bonusDice.filter(d => !d.kept).length;
